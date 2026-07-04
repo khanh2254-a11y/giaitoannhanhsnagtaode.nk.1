@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathOCR - Chuyển đổi PDF/Ảnh sang LaTeX & Word MathType</title>
+    <!-- Tailwind CSS for modern premium styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js for rendering PDF pages locally to images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <!-- JSZip for native .docx creation to avoid file corruption warnings in Microsoft Word -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better appearance */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+ 
+    <!-- Top Navigation / Header -->
+    <header class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md shadow-indigo-100">
+                    <!-- Math Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">MathOCR Pro</h1>
+                    <p class="text-xs text-slate-500">Chuyển đổi toán học & Tự động tạo lời giải chi tiết chuẩn MathType</p>
+                </div>
+            </div>
+
+            <!-- API Configuration Input Area directly in Header -->
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                <div class="flex items-center space-x-2 bg-slate-150/70 p-1 rounded-xl border border-slate-200 w-full max-w-sm">
+                    <input type="password" id="api-key-input" placeholder="Dán Gemini API Key của bạn..." class="w-full px-3 py-1.5 bg-transparent rounded-lg text-xs font-mono focus:outline-none text-slate-800 placeholder-slate-400" />
+                    <button id="save-key-btn" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition active:scale-95 shrink-0">Lưu Key</button>
+                </div>
+                <div class="text-[10px] font-bold text-indigo-600 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-150 flex items-center gap-1.5 shrink-0 select-none">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-550 animate-pulse"></span>
+                    API V2.9
+                </div>
+            </div>
+        </div>
+    </header>
+ 
+    <!-- Main Workspace -->
+    <main class="max-w-6xl w-full mx-auto p-4 md:p-6 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Panel: Input & Document Preview (5 cols) -->
+        <section class="lg:col-span-5 flex flex-col space-y-6">
+            
+            <!-- Upload Area Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Tải tài liệu lên
+                    </h2>
+                </div>
+ 
+                <!-- Interactive Drop & Paste Zone -->
+                <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-slate-50/50 rounded-xl p-6 text-center cursor-pointer transition duration-200 flex flex-col items-center justify-center min-h-[160px] group relative focus:outline-none">
+                    <input type="file" id="file-input" class="hidden" accept="application/pdf,image/*" />
+                     
+                    <div class="space-y-2 pointer-events-none">
+                        <!-- Icon Set -->
+                        <div class="flex justify-center space-x-2 text-slate-400 group-hover:text-indigo-500 transition duration-200">
+                            <!-- Image Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <!-- Plus -->
+                            <span class="text-2xl font-light self-center">+</span>
+                            <!-- PDF Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700">Kéo thả tệp PDF hoặc Ảnh vào đây</p>
+                        <p class="text-xs text-slate-400">Hoặc click để duyệt tìm tệp từ máy tính</p>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 bg-indigo-50 border border-indigo-100 rounded text-[11px] font-medium text-indigo-600 mt-1">
+                            <kbd class="bg-white px-1 py-0.5 rounded border border-indigo-200">Ctrl + V</kbd> để dán ảnh trực tiếp từ bộ nhớ tạm
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- Preview Card -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex-grow flex flex-col space-y-3 min-h-[300px]">
+                <h3 class="font-semibold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Xem trước dữ liệu nguồn
+                </h3>
+                
+                <div id="preview-container" class="flex-grow flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 p-4 overflow-y-auto max-h-[480px]">
+                    <div class="text-center space-y-2 p-6 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto stroke-current" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v12m0 0l-4-4m4 4l4-4M16 17V5m0 0l-4 4m4-4l4 4" />
+                        </svg>
+                        <p class="text-sm">Chưa có tệp nào được tải hoặc dán</p>
+                        <p class="text-xs text-slate-400">Hãy chọn một hình ảnh hoặc tài liệu PDF để hiển thị xem trước trang tại đây.</p>
+                    </div>
+                </div>
+            </div>
+ 
+        </section>
+ 
+        <!-- Right Panel: Conversion Options & Output (7 cols) -->
+        <section class="lg:col-span-7 flex flex-col space-y-6">
+            
+            <!-- Output and Action Box -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-grow min-h-[500px] space-y-4">
+                
+                <!-- Title and Conversion Action -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h2 class="font-semibold text-slate-900 text-base">Kết quả mã LaTeX (TeX)</h2>
+                            <p class="text-xs text-slate-400">Sẵn sàng sao chép hoặc xuất ra Word cho MathType</p>
+                        </div>
+                    </div>
+ 
+                    <!-- Main Action buttons in flow -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Step 1: OCR -->
+                        <button id="convert-btn" disabled class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-indigo-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span>1. Nhận diện LaTeX</span>
+                        </button>
+                        
+                        <!-- Step 2: Solver -->
+                        <button id="solve-btn" disabled class="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-purple-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span>2. Giải đề chi tiết</span>
+                        </button>
+ 
+                        <!-- Step 3: Quick Solver -->
+                        <button id="quick-solve-btn" disabled class="px-3 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-amber-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span>3. Giải nhanh (Đáp án)</span>
+                        </button>
+                    </div>
+                </div>
+ 
+                <!-- Guidance Info Box -->
+                <div class="bg-indigo-50 border border-indigo-100/80 rounded-xl p-3 flex items-start space-x-2.5">
+                    <span class="text-indigo-600 mt-0.5 animate-pulse">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <div class="text-[11px] text-slate-700 leading-relaxed space-y-1">
+                        <div><strong class="font-bold text-indigo-900">Quy trình xử lý tự động:</strong> Tải đề lên &rarr; Nhận diện LaTeX &rarr; Giải toán &rarr; Tải tệp Word.</div>
+                        <ul class="list-disc pl-4 text-[10px] text-slate-600 space-y-0.5">
+                            <li><strong class="text-emerald-700">Tự động gạch chân đáp án đề bài:</strong> Ứng dụng tự động dò tìm lời giải, gạch dưới nhãn phương án chính xác (ví dụ: <u>A.</u> hoặc <u>a)</u>) trực tiếp trên đề bài của tệp Word (.docx).</li>
+                            <li><strong class="text-slate-800">Biên soạn liên tục:</strong> Không bao gồm header, footer, số trang hay bất kỳ dấu hiệu phân trang rác nào để bảo đảm tương thích tốt nhất cho MathType.</li>
+                            <li><strong class="text-slate-800">Lời giải chuẩn tắc:</strong> Trình bày rõ ràng khối tiêu đề **Lời giải** (in đậm), tiếp theo là phần chốt đáp án rõ quy định bên dưới.</li>
+                        </ul>
+                    </div>
+                </div>
+ 
+                <!-- Status Progress Area -->
+                <div id="status-area" class="hidden">
+                    <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs font-semibold text-indigo-700">
+                            <span id="status-label" class="flex items-center gap-2">
+                                <svg class="animate-spin h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span id="status-text">Đang xử lý hình ảnh...</span>
+                            </span>
+                            <span id="status-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-indigo-200/50 rounded-full h-1.5 overflow-hidden">
+                            <div id="status-bar" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+ 
+                <!-- Output Textarea -->
+                <div class="flex-grow flex flex-col relative">
+                    <textarea id="latex-output" placeholder="Mã LaTeX chuẩn công thức toán học sẽ được xuất hiện tại đây..." class="w-full flex-grow p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none min-h-[320px]"></textarea>
+                    
+                    <!-- Quick Helper Label inside Editor -->
+                    <div class="absolute bottom-2 left-2 bg-slate-800 text-slate-400 text-[11px] px-2 py-0.5 rounded border border-slate-700/60 pointer-events-none">
+                        Trực quan & Chỉnh sửa trực tiếp được
+                    </div>
+                </div>
+ 
+                <!-- Action Button Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <!-- Copy LaTeX code -->
+                    <button id="copy-btn" disabled class="px-4 py-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-medium text-sm rounded-xl transition duration-150 flex items-center justify-center space-x-2 border border-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span id="copy-btn-text">Sao chép mã LaTeX</span>
+                    </button>
+ 
+                    <!-- Download Word Document -->
+                    <button id="download-word-btn" disabled class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-xl transition duration-150 flex items-center justify-center space-x-2 shadow-sm shadow-emerald-500/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Tải file Word cho MathType (.docx)</span>
+                    </button>
+                </div>
+ 
+                <div class="p-3 bg-amber-50 rounded-lg border border-amber-200/60 text-xs text-amber-800 space-y-1">
+                    <p class="font-semibold flex items-center gap-1.5 text-amber-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Hướng dẫn kích hoạt MathType trong Microsoft Word sau khi tải xuống:
+                    </p>
+                    <ol class="list-decimal pl-4 space-y-0.5 text-slate-700 font-normal">
+                        <li>Mở tệp Word đã tải bằng phần mềm MS Word.</li>
+                        <li>Chọn toàn bộ văn bản bằng tổ hợp phím <kbd class="bg-amber-100 px-1 py-0.5 rounded border border-amber-200">Ctrl + A</kbd>.</li>
+                        <li>Vào tab <strong class="text-amber-900">MathType</strong> trên thanh công cụ và nhấp vào nút <strong class="text-amber-900">"Toggle TeX"</strong> (hoặc nhấn <kbd class="bg-amber-100 px-1 py-0.5 rounded border border-amber-200">Alt + \</kbd>) để toàn bộ công thức LaTeX (bao gồm cả đề bài và lời giải chi tiết) tự động chuyển đổi sang ký hiệu MathType trực quan.</li>
+                    </ol>
+                </div>
+            </div>
+ 
+        </section>
+    </main>
+ 
+    <!-- Custom Modal/Toast Feedback (No default browser alerts) -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4">
+            <div id="modal-icon-wrapper" class="h-12 w-12 rounded-full flex items-center justify-center mx-auto">
+               <!-- Injected via JS -->
+            </div>
+            <div class="text-center space-y-2">
+                <h3 id="modal-title" class="text-base font-bold text-slate-900">Thông báo</h3>
+                <p id="modal-message" class="text-xs text-slate-500 leading-relaxed">Nội dung chi tiết thông báo.</p>
+            </div>
+            <div class="flex justify-center">
+                <button onclick="closeModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition duration-150 border border-slate-200">Đóng</button>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Sticky Toast notification -->
+    <div id="toast-notification" class="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-800 text-xs font-medium flex items-center space-x-2 transform translate-y-12 opacity-0 transition-all duration-300 pointer-events-none z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toast-message">Đã thực hiện xong thao tác!</span>
+    </div>
+ 
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-400">
+        <div class="max-w-6xl mx-auto">
+            Hệ thống nhận diện ứng dụng mô hình trí tuệ nhân tạo Gemini 2.5 Flash tiên tiến. Toàn bộ xử lý tệp diễn ra trực tiếp trên trình duyệt bảo mật tuyệt đối.
+        </div>
+    </footer>
+ 
+    <!-- Core App Logic Script -->
+    <script>
+        // Set up PDF.js global configurations
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+ 
+        // Retrieve and load the user's Gemini API Key on startup
+        let apiKey = localStorage.getItem("gemini_api_key") || "";
+ 
+        // Track selected file/state
+        let currentFiles = []; 
+ 
+        // UI Element References
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const convertBtn = document.getElementById('convert-btn');
+        const solveBtn = document.getElementById('solve-btn');
+        const quickSolveBtn = document.getElementById('quick-solve-btn');
+        const latexOutput = document.getElementById('latex-output');
+        const copyBtn = document.getElementById('copy-btn');
+        const copyBtnText = document.getElementById('copy-btn-text');
+        const downloadWordBtn = document.getElementById('download-word-btn');
+        const statusArea = document.getElementById('status-area');
+        const statusBar = document.getElementById('status-bar');
+        const statusLabel = document.getElementById('status-label');
+        const statusPercent = document.getElementById('status-percent');
+        const statusText = document.getElementById('status-text');
+ 
+        // API UI Fields
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveKeyBtn = document.getElementById('save-key-btn');
+
+        // Pre-fill configured API Key on startup
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+        }
+
+        // Add Save API Key listener with localStorage persistency
+        saveKeyBtn.addEventListener('click', () => {
+            const trimmedVal = apiKeyInput.value.trim();
+            localStorage.setItem("gemini_api_key", trimmedVal);
+            apiKey = trimmedVal;
+            showToast("Đã lưu API Key thành công vào bộ nhớ!");
+        });
+
+        // Drag & Drop handlers
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('border-indigo-500', 'bg-indigo-50/20');
+            }, false);
+        });
+ 
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/20');
+            }, false);
+        });
+ 
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        });
+ 
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+ 
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processUploadedFile(e.target.files[0]);
+            }
+        });
+ 
+        // Clipboard paste monitoring
+        window.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    processUploadedFile(file);
+                    showToast("Ảnh từ Clipboard đã được dán thành công!");
+                    break;
+                }
+            }
+        });
+ 
+        // Track when text is manually pasted/typed into the editor
+        latexOutput.addEventListener('input', () => {
+            const hasText = latexOutput.value.trim() !== "";
+            solveBtn.disabled = !hasText;
+            quickSolveBtn.disabled = !hasText;
+            copyBtn.disabled = !hasText;
+            downloadWordBtn.disabled = !hasText;
+        });
+ 
+        // Helper to escape HTML characters safely
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+ 
+        // Handler to routing file types
+        function processUploadedFile(file) {
+            if (file.type === "application/pdf") {
+                handlePDFFile(file);
+            } else if (file.type.startsWith("image/")) {
+                handleImageFile(file);
+            } else {
+                showModal(
+                    "Định dạng không được hỗ trợ",
+                    "Vui lòng chỉ tải lên tài liệu PDF hoặc các loại tệp ảnh thông dụng (PNG, JPG, JPEG, WEBP).",
+                    "error"
+                );
+            }
+        }
+ 
+        // Processing Image file input & Paste
+        function handleImageFile(file) {
+            currentFiles = [{
+                type: 'image',
+                file: file,
+                name: file.name || `Pasted_Image_${Date.now()}.png`
+            }];
+ 
+            previewContainer.innerHTML = `
+                <div class="flex items-center justify-center p-4">
+                    <svg class="animate-spin h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            `;
+ 
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewContainer.innerHTML = `
+                    <div class="relative w-full rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-2 shadow-inner">
+                        <div class="flex items-center justify-between px-2 pb-2 border-b border-slate-200/60 mb-2">
+                            <span class="text-xs font-semibold text-slate-500 truncate max-w-[250px]">Tên ảnh: ${escapeHTML(file.name || 'Ảnh đã dán từ Clipboard')}</span>
+                            <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold uppercase">${file.type.split('/')[1] || 'IMAGE'}</span>
+                        </div>
+                        <img src="${e.target.result}" class="max-h-96 mx-auto object-contain rounded-lg" alt="Document Preview" />
+                    </div>
+                `;
+                currentFiles[0].base64 = e.target.result.split(',')[1];
+                currentFiles[0].mimeType = file.type || 'image/png';
+                convertBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+ 
+        // PDF renderer helper (Convert pages to Base64 images)
+        async function pdfToImages(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const images = [];
+            
+            // Limit conversion up to 10 pages for optimal resource usage in playground
+            const maxPageLimit = 10;
+            const numPages = Math.min(pdf.numPages, maxPageLimit);
+            
+            for (let i = 1; i <= numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const base64 = canvas.toDataURL('image/png').split(',')[1];
+                images.push({ base64, pageNum: i });
+            }
+            return { images, totalPages: pdf.numPages, limited: pdf.numPages > maxPageLimit };
+        }
+ 
+        // Processing PDF files to visuals
+        async function handlePDFFile(file) {
+            previewContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-8 space-y-3">
+                    <svg class="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div class="text-center">
+                        <span class="text-sm font-semibold text-slate-700">Đang chuẩn bị trang PDF...</span>
+                        <p class="text-xs text-slate-400">Đang chuyển đổi định dạng trang sang ảnh gốc để phục vụ nhận diện toán học...</p>
+                    </div>
+                </div>
+            `;
+            convertBtn.disabled = true;
+ 
+            try {
+                const { images, totalPages, limited } = await pdfToImages(file);
+                currentFiles = images.map(img => ({
+                    type: 'pdf-page',
+                    base64: img.base64,
+                    mimeType: 'image/png',
+                    name: `${file.name} - Trang ${img.pageNum}`
+                }));
+ 
+                previewContainer.innerHTML = `
+                    <div class="w-full space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-150">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách các trang PDF (${currentFiles.length} trang)</span>
+                            ${limited ? `<span class="text-[10px] bg-amber-100 text-amber-800 font-medium px-2 py-0.5 rounded-full">Giới hạn 10 trang</span>` : ''}
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto p-1 bg-slate-100/50 rounded-xl">
+                            ${currentFiles.map((f, idx) => `
+                                <div class="relative border border-slate-200 rounded-lg p-1 bg-white hover:border-indigo-400 transition cursor-default shadow-sm flex flex-col justify-between">
+                                    <img src="data:image/png;base64,${f.base64}" class="h-32 mx-auto object-contain rounded" />
+                                    <div class="mt-1 text-[10px] font-semibold text-center text-slate-500 border-t pt-1">Trang ${idx + 1}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                convertBtn.disabled = false;
+                showToast("Đã giải mã PDF thành công, sẵn sàng nhận diện!");
+            } catch (error) {
+                previewContainer.innerHTML = `
+                    <div class="text-center p-6 text-rose-500 space-y-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="text-sm font-semibold">Lỗi phân tích tệp PDF</p>
+                        <p class="text-xs text-slate-400">Đã xảy ra lỗi khi giải mã PDF. Vui lòng kiểm tra lại tệp tin của bạn.</p>
+                    </div>
+                `;
+                console.error("PDF Parsing Error: ", error);
+            }
+        }
+ 
+        // exponential backoff fetch implementation (Mandatory Error Handling & Network Resilience)
+        async function fetchWithExponentialBackoff(url, options, maxRetries = 5) {
+            let delay = 1000;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    
+                    // If rate limit (429) or server error, trigger retry
+                    if (response.status === 429 || response.status >= 500) {
+                        if (i === maxRetries - 1) {
+                            throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                        }
+                    } else {
+                        // For 400 client-side errors, throw immediately to prevent unnecessary retries
+                        const errBody = await response.text();
+                        throw new Error(`API Error [${response.status}]: ${errBody}`);
+                    }
+                } catch (err) {
+                    if (i === maxRetries - 1) throw err;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2; // exponential backing-off: 1s, 2s, 4s, 8s, 16s
+            }
+        }
+ 
+        // 1) Primary Trigger: LaTeX OCR Conversion (Recognize math via Gemini API)
+        convertBtn.addEventListener('click', async () => {
+            if (currentFiles.length === 0) return;
+ 
+            // Guard clause for API Key validity before dispatching calls
+            if (!apiKey) {
+                showModal(
+                    "Cần nhập API Key",
+                    "Vui lòng điền mã Gemini API Key của bạn vào thanh cấu hình ở phía trên đầu trang và bấm 'Lưu Key' để sử dụng chức năng này.",
+                    "error"
+                );
+                return;
+            }
+
+            statusArea.classList.remove('hidden');
+            convertBtn.disabled = true;
+            solveBtn.disabled = true;
+            quickSolveBtn.disabled = true;
+            latexOutput.value = "";
+ 
+            let fullResult = "";
+            const total = currentFiles.length;
+ 
+            try {
+                for (let i = 0; i < total; i++) {
+                    const currentFile = currentFiles[i];
+                    updateProgress(
+                        Math.round((i / total) * 100), 
+                        `Đang xử lý trang ${i + 1}/${total}...`
+                    );
+ 
+                    const payload = {
+                        contents: [{
+                            parts: [
+                                { 
+                                    text: "Hãy đọc nội dung từ hình ảnh toán học này và chuyển đổi sang mã văn bản LaTeX chuẩn tiếng Việt một cách sạch sẽ và chính xác nhất. YÊU CẦU ĐẶC BIỆT: Loại bỏ hoàn toàn mọi thông tin tiêu đề đầu trang (header), chân trang (footer), số trang, dấu hiệu phân trang, hoặc ký hiệu bắt đầu/kết thúc trang có trong tài liệu nguồn. Nội dung tài liệu phải được biên soạn liên tục từ trên xuống dưới không bị xen ngang hay ngắt quãng bởi bất kỳ thông tin bổ sung hay ký hiệu trang nào ngoài nội dung chính. Quy ước: Các phương án trắc nghiệm hoặc danh sách câu cần được viết rõ ràng, mỗi câu một dòng mới. Định dạng công thức toán nằm gọn trong ký hiệu dấu dollar $ (đối với công thức nằm cùng hàng) hoặc kép $$ (đối với dòng chứa công thức độc lập, căn giữa) để tương thích tốt nhất khi xuất ra Microsoft Word bằng MathType. Không thêm dấu hoặc từ khóa định dạng khối '```latex' hay '```html' ở đầu và cuối phản hồi. Chỉ trả về trực tiếp mã LaTeX sạch." 
+                                },
+                                { 
+                                    inlineData: { 
+                                        mimeType: currentFile.mimeType, 
+                                        data: currentFile.base64 
+                                    } 
+                                }
+                            ]
+                        }]
+                    };
+ 
+                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                    const responseData = await fetchWithExponentialBackoff(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+ 
+                    const textResult = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (textResult) {
+                        fullResult += textResult + "\n\n";
+                    }
+                }
+ 
+                updateProgress(100, "Hoàn tất nhận diện!");
+                setTimeout(() => statusArea.classList.add('hidden'), 1500);
+ 
+                latexOutput.value = fullResult.trim();
+                
+                // Enable secondary tools
+                solveBtn.disabled = false;
+                quickSolveBtn.disabled = false;
+                copyBtn.disabled = false;
+                downloadWordBtn.disabled = false;
+                
+                showToast("Đã chuyển đổi LaTeX hoàn tất!");
+            } catch (err) {
+                console.error("OCR API error: ", err);
+                statusArea.classList.add('hidden');
+                showModal(
+                    "Lỗi chuyển đổi OCR",
+                    `Không thể thực hiện nhận diện toán học bằng trí tuệ nhân tạo. Lỗi: ${err.message}. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.`,
+                    "error"
+                );
+            } finally {
+                convertBtn.disabled = false;
+            }
+        });
+ 
+        // Helper to request content/math resolution from Gemini
+        async function solveMathPrompt(promptMessage, successMessage) {
+            const rawContent = latexOutput.value.trim();
+            if (!rawContent) return;
+ 
+            // Guard clause for API Key validity before dispatching calls
+            if (!apiKey) {
+                showModal(
+                    "Cần nhập API Key",
+                    "Vui lòng điền mã Gemini API Key của bạn vào thanh cấu hình ở phía trên đầu trang và bấm 'Lưu Key' để sử dụng chức năng này.",
+                    "error"
+                );
+                return;
+            }
+
+            statusArea.classList.remove('hidden');
+            solveBtn.disabled = true;
+            quickSolveBtn.disabled = true;
+            convertBtn.disabled = true;
+ 
+            updateProgress(30, "Trí tuệ nhân tạo đang phân tích đề...");
+ 
+            try {
+                const payload = {
+                    contents: [{
+                        parts: [{ 
+                            text: `${promptMessage}\n\nĐề bài gốc LaTeX:\n${rawContent}` 
+                        }]
+                    }]
+                };
+ 
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                updateProgress(60, "Đang khởi tạo lời giải tối ưu...");
+                
+                const responseData = await fetchWithExponentialBackoff(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+ 
+                const outputText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (outputText) {
+                    latexOutput.value = outputText.trim();
+                    updateProgress(100, "Hoàn tất giải đề!");
+                    showToast(successMessage);
+                } else {
+                    throw new Error("Không nhận được nội dung trả về hợp lệ từ API.");
+                }
+            } catch (err) {
+                console.error("Solver Error: ", err);
+                showModal(
+                    "Lỗi xử lý giải toán",
+                    `Đã có sự cố xảy ra khi giải bài tập này: ${err.message}`,
+                    "error"
+                );
+            } finally {
+                statusArea.classList.add('hidden');
+                solveBtn.disabled = false;
+                quickSolveBtn.disabled = false;
+                convertBtn.disabled = false;
+            }
+        }
+ 
+        // 2) Solve step-by-step
+        solveBtn.addEventListener('click', () => {
+            const prompt = `Hãy giải chi tiết toàn bộ các câu hỏi toán học dưới đây bằng Tiếng Việt. Định dạng đầu ra phải là mã LaTeX sạch (không bọc trong khối markdown \`\`\`latex).
+
+YÊU CẦU ĐẶC BIỆT VỀ TRÌNH BÀY LỜI GIẢI:
+- Không chèn bất kỳ thông tin tiêu đề đầu trang (header), chân trang (footer), số trang, hay bất kỳ ký hiệu đánh dấu bắt đầu/kết thúc trang nào. Nội dung các trang phải biên soạn liên tục không ngắt đoạn rác.
+- Giữ nguyên cấu trúc đề bài đã cho. Ngay dưới đề bài của mỗi câu hỏi, chèn khối lời giải. 
+- Khối lời giải bắt đầu bằng dòng chữ in đậm **Lời giải** trên một dòng độc lập, sau đó trình bày các bước lập luận chi tiết.
+- Sau khi kết thúc phần trình bày lời giải, hãy tiến hành CHỐT ĐÁP ÁN ĐÚNG ở cuối lời giải theo đúng phân loại câu hỏi như sau:
+
+1. Đối với CÂU TRẮC NGHIỆM 4 PHƯƠNG ÁN LỰA CHỌN (A, B, C, D):
+   - Chốt bằng câu: "Chọn đáp án [A/B/C/D]." (Ví dụ: 'Chọn đáp án A.').
+
+2. Đối với CÂU TRẮC NGHIỆM TRẢ LỜI ĐÚNG HOẶC SAI (có các ý a) b) c) d)):
+   - Chốt cụ thể trạng thái của từng ý trên một dòng mới dưới dạng: 'ý a) [đúng/sai], ý b) [đúng/sai], ý c) [đúng/sai], ý d) [đúng/sai] tương ứng.'
+   - Dòng cuối cùng của lời giải câu trắc nghiệm đúng sai phải ghi chính xác dòng chốt sau: 'Các ý đúng: [ví dụ: a, c]'.
+
+3. Đối với CÂU TRẮC NGHIỆM TRẢ LỜI NGẮN:
+   - Trình bày lời giải chi tiết, sau đó ghi rõ kết quả cuối cùng ở dòng cuối cùng của lời giải dưới dạng: 'Kết quả: [giá trị cuối cùng]'.`;
+            solveMathPrompt(prompt, "Đã khởi tạo lời giải chi tiết thành công!");
+        });
+ 
+        // 3) Solve quick (Answer Only)
+        quickSolveBtn.addEventListener('click', () => {
+            const prompt = `Hãy cung cấp danh sách đáp án ngắn gọn của các câu hỏi dưới đây bằng Tiếng Việt. Định dạng đầu ra là mã LaTeX sạch (không bọc trong khối markdown \`\`\`latex). Biên soạn liên tục và không chứa header/footer/số trang.
+
+Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dưới chèn dòng **Lời giải** rồi chốt ngay đáp án:
+- Đối với câu trắc nghiệm 4 lựa chọn (A, B, C, D): Ghi trực tiếp: 'Chọn đáp án [A/B/C/D].'
+- Đối với câu hỏi Đúng/Sai (a, b, c, d): Ghi trực tiếp chốt: 'ý a) [đúng/sai], ý b) [đúng/sai], ý c) [đúng/sai], ý d) [đúng/sai] tương ứng. Các ý đúng: [liệt kê các ý đúng]'
+- Đối với câu trả lời ngắn: Ghi trực tiếp chốt: 'Kết quả: [giá trị]'`;
+            solveMathPrompt(prompt, "Đã hiển thị đáp số nhanh!");
+        });
+ 
+        // Copy to clipboard helper
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = latexOutput.value;
+            if (!textToCopy) return;
+ 
+            // Workaround logic for copying text within iframe environments safely
+            try {
+                const tempTextArea = document.createElement("textarea");
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempTextArea);
+                
+                // Show UX feedback
+                copyBtnText.innerText = "Đã sao chép!";
+                copyBtn.classList.remove('bg-slate-100', 'text-slate-700');
+                copyBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                showToast("Đã sao chép mã LaTeX vào Clipboard!");
+                
+                setTimeout(() => {
+                    copyBtnText.innerText = "Sao chép mã LaTeX";
+                    copyBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    copyBtn.classList.add('bg-slate-100', 'text-slate-700');
+                }, 2000);
+            } catch (err) {
+                showToast("Không thể tự động sao chép. Hãy chọn tất cả và nhấn Ctrl+C.");
+            }
+        });
+ 
+        // Helper to dynamically parse text and recognize which answer options should be underlined
+        function parseAndApplyStylesToDocx(text) {
+            const lines = text.split('\n');
+            const paragraphsXml = [];
+            
+            // Map of correct options identified from the detailed solution texts
+            // Structure: { câu_số: { choice: 'A'|'B'|'C'|'D', tfAnswers: { a: true, b: false, c: true, d: false } } }
+            const correctAnswersMap = {};
+ 
+            // Phase 1: Scan for solutions to extract correct options
+            let currentQuestionNum = null;
+            const questionRegex = /(?:Câu|Question)\s*(\d+)/i;
+            const choiceDecisionRegex = /(?:Chọn đáp án|Chọn)\s*([A-D])/i;
+            
+            // Enhanced highly-robust Vietnamese regex for T/F answers
+            const tfRegex = /(?:ý\s*)?\b([a-d])[\)\.]?\s*(?:là\s*|-?\s*)?(đúng|sai|đ|s)\b/ig;
+            const tfCorrectListRegex = /(?:Các ý đúng|ý đúng)[:\s]*([a-d,\s\-\&]+)/i;
+ 
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                const qMatch = line.match(questionRegex);
+                if (qMatch) {
+                    currentQuestionNum = parseInt(qMatch[1]);
+                    correctAnswersMap[currentQuestionNum] = {
+                        choice: null,
+                        tfAnswers: { a: false, b: false, c: false, d: false }
+                    };
+                }
+                if (currentQuestionNum !== null && correctAnswersMap[currentQuestionNum]) {
+                    // Match standard 4-choice answer chốt
+                    const cMatch = line.match(choiceDecisionRegex);
+                    if (cMatch) {
+                        correctAnswersMap[currentQuestionNum].choice = cMatch[1].toUpperCase();
+                    }
+                    
+                    // Match True/False individual declarations (e.g., 'ý a) đúng')
+                    let tfMatch;
+                    tfRegex.lastIndex = 0;
+                    while ((tfMatch = tfRegex.exec(line)) !== null) {
+                        const optionLetter = tfMatch[1].toLowerCase();
+                        const status = tfMatch[2].toLowerCase();
+                        if (status.startsWith('đ') || status === 'đ') {
+                            correctAnswersMap[currentQuestionNum].tfAnswers[optionLetter] = true;
+                        }
+                    }
+                    
+                    // Match collective correct statement lists (e.g., 'Các ý đúng: a, c')
+                    const tfListMatch = line.match(tfCorrectListRegex);
+                    if (tfListMatch) {
+                        const listStr = tfListMatch[1].toLowerCase();
+                        const foundOptions = listStr.match(/[a-d]/g);
+                        if (foundOptions) {
+                            foundOptions.forEach(opt => {
+                                correctAnswersMap[currentQuestionNum].tfAnswers[opt] = true;
+                            });
+                        }
+                    }
+                }
+            }
+ 
+            // Phase 2: Convert lines into document XML paragraphs with bold & underline helpers
+            currentQuestionNum = null;
+            let insideSolutionBlock = false;
+ 
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmedLine = line.trim();
+                
+                // Track question context
+                const qMatch = trimmedLine.match(questionRegex);
+                if (qMatch) {
+                    currentQuestionNum = parseInt(qMatch[1]);
+                    insideSolutionBlock = false; // Reset block context on new question
+                }
+                
+                if (trimmedLine.includes('Lời giải') || trimmedLine.includes('LỜI GIẢI')) {
+                    insideSolutionBlock = true;
+                }
+                
+                // Strict check to avoid geometric point matches (like ABC)
+                let isChoiceLineABCD = /(?<!\w)\*{0,2}[A-D][\.\:\)]/i.test(trimmedLine);
+                let isChoiceLineTF = /(?<!\w)\*{0,2}[a-d][\)\.]/i.test(trimmedLine);
+                
+                let pXml = '<w:p>';
+                
+                // Apply formatting ONLY to the question section (not in the step-by-step solution description text)
+                if (!insideSolutionBlock && currentQuestionNum !== null && correctAnswersMap[currentQuestionNum]) {
+                    const ansData = correctAnswersMap[currentQuestionNum];
+                    
+                    if (isChoiceLineTF) {
+                        // Vietnam True/False option split and format
+                        const chunks = line.split(/(?=\b\*{0,2}[a-d][\)\.]\*{0,2})/i).filter(c => c.length > 0);
+                        pXml += '<w:pPr><w:jc w:val="left"/></w:pPr>';
+                        for (let j = 0; j < chunks.length; j++) {
+                            const chunk = chunks[j];
+                            // Match True/False prefix label like "a) " or "a. "
+                            const tfPrefixMatch = chunk.match(/^(\s*\*{0,2}([a-d])([\)\.])\*{0,2}\s*)/i);
+                            
+                            if (tfPrefixMatch) {
+                                const fullPrefix = tfPrefixMatch[1];
+                                const optionLetter = tfPrefixMatch[2].toLowerCase();
+                                const restOfChunk = chunk.substring(fullPrefix.length);
+                                const isCorrectTF = (ansData.tfAnswers[optionLetter] === true);
+                                
+                                pXml += `
+                                    <w:r>
+                                        <w:rPr>
+                                            ${isCorrectTF ? '<w:b/><w:u w:val="single"/>' : ''}
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(fullPrefix)}</w:t>
+                                    </w:r>
+                                    <w:r>
+                                        <w:rPr>
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(restOfChunk)}</w:t>
+                                    </w:r>
+                                `;
+                            } else {
+                                pXml += `
+                                    <w:r>
+                                        <w:rPr>
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(chunk)}</w:t>
+                                    </w:r>
+                                `;
+                            }
+                        }
+                    } else if (isChoiceLineABCD) {
+                        const targetChoice = ansData.choice;
+                        // Robust splitting before any option prefix A. B. C. D. with optional Markdown bold characters
+                        const chunks = line.split(/(?=(?<!\w)\*{0,2}[A-D][\.\:\)])/i).filter(c => c.length > 0);
+                        pXml += '<w:pPr><w:jc w:val="left"/></w:pPr>';
+                        
+                        for (let j = 0; j < chunks.length; j++) {
+                            const chunk = chunks[j];
+                            // Match ABCD prefix label like "A. " or "A) "
+                            const prefixMatch = chunk.match(/^(\s*\*{0,2}([A-D])([\.\:\)])\*{0,2}\s*)/i);
+                            
+                            if (prefixMatch) {
+                                const fullPrefix = prefixMatch[1];
+                                const choiceLetter = prefixMatch[2].toUpperCase();
+                                const restOfChunk = chunk.substring(fullPrefix.length);
+                                const shouldUnderline = (targetChoice && choiceLetter === targetChoice);
+                                
+                                pXml += `
+                                    <w:r>
+                                        <w:rPr>
+                                            ${shouldUnderline ? '<w:b/><w:u w:val="single"/>' : ''}
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(fullPrefix)}</w:t>
+                                    </w:r>
+                                    <w:r>
+                                        <w:rPr>
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(restOfChunk)}</w:t>
+                                    </w:r>
+                                `;
+                            } else {
+                                pXml += `
+                                    <w:r>
+                                        <w:rPr>
+                                            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                            <w:sz w:val="24"/>
+                                        </w:rPr>
+                                        <w:t xml:space="preserve">${escapeXmlString(chunk)}</w:t>
+                                    </w:r>
+                                `;
+                            }
+                        }
+                    } else {
+                        // Normal question body text
+                        pXml += createStandardParagraphRun(line, trimmedLine.startsWith('**') || trimmedLine.startsWith('Câu'));
+                    }
+                } else {
+                    // Standard text lines (or inside solution text body context)
+                    const isHeader = trimmedLine.startsWith('**') || trimmedLine.startsWith('Câu') || trimmedLine.startsWith('Lời giải');
+                    pXml += `
+                        <w:pPr>
+                            <w:jc w:val="left"/>
+                            ${trimmedLine.includes('$$') ? '<w:jc w:val="center"/>' : ''}
+                        </w:pPr>
+                        <w:r>
+                            <w:rPr>
+                                ${isHeader ? '<w:b/>' : ''}
+                                <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                                <w:sz w:val="24"/>
+                            </w:rPr>
+                            <w:t>${escapeXmlString(line)}</w:t>
+                        </w:r>
+                    `;
+                }
+                
+                pXml += '</w:p>';
+                paragraphsXml.push(pXml);
+            }
+            return paragraphsXml.join('\n');
+        }
+ 
+        // Helper to format text XML content
+        function createStandardParagraphRun(text, isBold = false) {
+            return `
+                <w:pPr><w:jc w:val="left"/></w:pPr>
+                <w:r>
+                    <w:rPr>
+                        ${isBold ? '<w:b/>' : ''}
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+                        <w:sz w:val="24"/>
+                    </w:rPr>
+                    <w:t>${escapeXmlString(text)}</w:t>
+                </w:r>
+            `;
+        }
+ 
+        // Safe XML characters encoder
+        function escapeXmlString(unsafe) {
+            return unsafe.replace(/[<>&'"]/g, function (c) {
+                switch (c) {
+                    case '<': return '&lt;';
+                    case '>': return '&gt;';
+                    case '&': return '&amp;';
+                    case '\'': return '&apos;';
+                    case '"': return '&quot;';
+                }
+            });
+        }
+ 
+        // 4) Download clean DOCX formatted output
+        downloadWordBtn.addEventListener('click', async () => {
+            const finalContent = latexOutput.value.trim();
+            if (!finalContent) return;
+ 
+            downloadWordBtn.disabled = true;
+            showToast("Đang kết xuất tệp Word .docx chuẩn...");
+ 
+            try {
+                const zip = new JSZip();
+                
+                // 1. [Content_Types].xml
+                zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                    <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                        <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                        <Default Extension="xml" ContentType="application/xml"/>
+                        <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+                    </Types>`);
+                
+                // 2. _rels/.rels
+                zip.file("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                        <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+                    </Relationships>`);
+                
+                // 3. word/document.xml (Inject processed paragraphs with style markers)
+                const bodyContent = parseAndApplyStylesToDocx(finalContent);
+                
+                zip.file("word/document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                    <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                        <w:body>
+                            ${bodyContent}
+                            <w:sectPr>
+                                <w:pgSz w:w="11906" w:h="16838"/>
+                                <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/>
+                            </w:sectPr>
+                        </w:body>
+                    </w:document>`);
+                
+                // Generate download link securely
+                const content = await zip.generateAsync({ type: "blob" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = `MathOCR_Report_${Date.now()}.docx`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+ 
+                showToast("Tải tệp Word thành công!");
+            } catch (err) {
+                console.error("DOCX generation error: ", err);
+                showModal("Lỗi tạo tệp", "Không thể tự động xuất dữ liệu sang định dạng Word .docx.", "error");
+            } finally {
+                downloadWordBtn.disabled = false;
+            }
+        });
+ 
+        // Helper to update linear progress UI
+        function updateProgress(percent, text) {
+            statusBar.style.width = percent + "%";
+            statusPercent.innerText = percent + "%";
+            statusText.innerText = text;
+        }
+ 
+        // Toast Feedback Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const msgSpan = document.getElementById('toast-message');
+            msgSpan.innerText = message;
+            
+            toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+ 
+        // Custom Modal Dialogue (Replaces browser alert)
+        function showModal(title, message, type = "info") {
+            const container = document.getElementById('modal-container');
+            const titleEl = document.getElementById('modal-title');
+            const messageEl = document.getElementById('modal-message');
+            const iconWrapper = document.getElementById('modal-icon-wrapper');
+            
+            titleEl.innerText = title;
+            messageEl.innerText = message;
+            
+            if (type === "error") {
+                iconWrapper.className = "h-12 w-12 rounded-full flex items-center justify-center mx-auto bg-rose-50 text-rose-600 border border-rose-100";
+                iconWrapper.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                `;
+            } else {
+                iconWrapper.className = "h-12 w-12 rounded-full flex items-center justify-center mx-auto bg-indigo-50 text-indigo-600 border border-indigo-100";
+                iconWrapper.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                `;
+            }
+            
+            container.classList.remove('hidden');
+        }
+ 
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
