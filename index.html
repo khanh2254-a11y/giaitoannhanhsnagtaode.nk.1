@@ -36,7 +36,7 @@
  
     <!-- Top Navigation / Header -->
     <header class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md shadow-indigo-100">
                     <!-- Math Icon -->
@@ -49,21 +49,21 @@
                     <p class="text-xs text-slate-500">Chuyển đổi toán học & Tự động tạo lời giải chi tiết chuẩn MathType</p>
                 </div>
             </div>
-
-            <!-- API Configuration Input Area directly in Header -->
-            <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
-                <div class="flex items-center space-x-2 bg-slate-150/70 p-1 rounded-xl border border-slate-200 w-full max-w-sm">
-                    <input type="password" id="api-key-input" placeholder="Dán Gemini API Key của bạn..." class="w-full px-3 py-1.5 bg-transparent rounded-lg text-xs font-mono focus:outline-none text-slate-800 placeholder-slate-400" />
-                    <button id="save-key-btn" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition active:scale-95 shrink-0">Lưu Key</button>
+            
+            <!-- API Key Input Config & Badge -->
+            <div class="flex items-center flex-wrap gap-3">
+                <div class="flex items-center space-x-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200 shadow-inner">
+                    <input type="password" id="api-key-input" placeholder="Nhập Gemini API Key..." class="px-2.5 py-1.5 bg-transparent rounded-lg text-xs focus:outline-none focus:ring-0 w-44 text-slate-800 font-medium placeholder-slate-450" />
+                    <button id="save-key-btn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition active:scale-95 shadow-sm shadow-indigo-100">Lưu Key</button>
                 </div>
-                <div class="text-[10px] font-bold text-indigo-600 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-150 flex items-center gap-1.5 shrink-0 select-none">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-550 animate-pulse"></span>
-                    API V2.9
+                <div class="text-xs font-medium text-indigo-600 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-100 flex items-center gap-1.5 animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    Phiên bản 2.6 - Tích hợp tính năng Sinh đề sáng tạo
                 </div>
             </div>
         </div>
     </header>
- 
+
     <!-- Main Workspace -->
     <main class="max-w-6xl w-full mx-auto p-4 md:p-6 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6">
         
@@ -80,11 +80,11 @@
                         Tải tài liệu lên
                     </h2>
                 </div>
- 
+
                 <!-- Interactive Drop & Paste Zone -->
                 <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 hover:bg-slate-50/50 rounded-xl p-6 text-center cursor-pointer transition duration-200 flex flex-col items-center justify-center min-h-[160px] group relative focus:outline-none">
                     <input type="file" id="file-input" class="hidden" accept="application/pdf,image/*" />
-                     
+                    
                     <div class="space-y-2 pointer-events-none">
                         <!-- Icon Set -->
                         <div class="flex justify-center space-x-2 text-slate-400 group-hover:text-indigo-500 transition duration-200">
@@ -107,7 +107,7 @@
                     </div>
                 </div>
             </div>
- 
+
             <!-- Preview Card -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex-grow flex flex-col space-y-3 min-h-[300px]">
                 <h3 class="font-semibold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
@@ -121,21 +121,21 @@
                 <div id="preview-container" class="flex-grow flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 p-4 overflow-y-auto max-h-[480px]">
                     <div class="text-center space-y-2 p-6 text-slate-400">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto stroke-current" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v12m0 0l-4-4m4 4l4-4M16 17V5m0 0l-4 4m4-4l4 4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v12m0 0l-4-4m4 4l4-4M16 17V5m0 0l-4 4m4-4l4 4" />
                         </svg>
                         <p class="text-sm">Chưa có tệp nào được tải hoặc dán</p>
                         <p class="text-xs text-slate-400">Hãy chọn một hình ảnh hoặc tài liệu PDF để hiển thị xem trước trang tại đây.</p>
                     </div>
                 </div>
             </div>
- 
+
         </section>
- 
+
         <!-- Right Panel: Conversion Options & Output (7 cols) -->
         <section class="lg:col-span-7 flex flex-col space-y-6">
             
-            <!-- Output and Action Box -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-grow min-h-[500px] space-y-4">
+            <!-- Output and Action Box (Original Quiz) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col space-y-4">
                 
                 <!-- Title and Conversion Action -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
@@ -146,11 +146,11 @@
                             </svg>
                         </span>
                         <div>
-                            <h2 class="font-semibold text-slate-900 text-base">Kết quả mã LaTeX (TeX)</h2>
+                            <h2 class="font-semibold text-slate-900 text-base">Kết quả mã LaTeX đề gốc (TeX)</h2>
                             <p class="text-xs text-slate-400">Sẵn sàng sao chép hoặc xuất ra Word cho MathType</p>
                         </div>
                     </div>
- 
+
                     <!-- Main Action buttons in flow -->
                     <div class="flex items-center gap-2 flex-wrap">
                         <!-- Step 1: OCR -->
@@ -168,17 +168,17 @@
                             </svg>
                             <span>2. Giải đề chi tiết</span>
                         </button>
- 
+
                         <!-- Step 3: Quick Solver -->
                         <button id="quick-solve-btn" disabled class="px-3 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-amber-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
-                            <span>3. Giải nhanh (Đáp án)</span>
+                            <span>3. Giải nhanh (Chỉ đáp án)</span>
                         </button>
                     </div>
                 </div>
- 
+
                 <!-- Guidance Info Box -->
                 <div class="bg-indigo-50 border border-indigo-100/80 rounded-xl p-3 flex items-start space-x-2.5">
                     <span class="text-indigo-600 mt-0.5 animate-pulse">
@@ -186,16 +186,11 @@
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0118 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                         </svg>
                     </span>
-                    <div class="text-[11px] text-slate-700 leading-relaxed space-y-1">
-                        <div><strong class="font-bold text-indigo-900">Quy trình xử lý tự động:</strong> Tải đề lên &rarr; Nhận diện LaTeX &rarr; Giải toán &rarr; Tải tệp Word.</div>
-                        <ul class="list-disc pl-4 text-[10px] text-slate-600 space-y-0.5">
-                            <li><strong class="text-emerald-700">Tự động gạch chân đáp án đề bài:</strong> Ứng dụng tự động dò tìm lời giải, gạch dưới nhãn phương án chính xác (ví dụ: <u>A.</u> hoặc <u>a)</u>) trực tiếp trên đề bài của tệp Word (.docx).</li>
-                            <li><strong class="text-slate-800">Biên soạn liên tục:</strong> Không bao gồm header, footer, số trang hay bất kỳ dấu hiệu phân trang rác nào để bảo đảm tương thích tốt nhất cho MathType.</li>
-                            <li><strong class="text-slate-800">Lời giải chuẩn tắc:</strong> Trình bày rõ ràng khối tiêu đề **Lời giải** (in đậm), tiếp theo là phần chốt đáp án rõ quy định bên dưới.</li>
-                        </ul>
+                    <div class="text-[11px] text-indigo-850 leading-relaxed space-y-1">
+                        <div><strong class="font-bold">Quy trình xử lý tự động:</strong> Tải đề lên &rarr; Nhận diện LaTeX &rarr; Giải toán &rarr; Tải tệp Word.</div>
                     </div>
                 </div>
- 
+
                 <!-- Status Progress Area -->
                 <div id="status-area" class="hidden">
                     <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-2">
@@ -214,17 +209,17 @@
                         </div>
                     </div>
                 </div>
- 
+
                 <!-- Output Textarea -->
                 <div class="flex-grow flex flex-col relative">
-                    <textarea id="latex-output" placeholder="Mã LaTeX chuẩn công thức toán học sẽ được xuất hiện tại đây..." class="w-full flex-grow p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none min-h-[320px]"></textarea>
+                    <textarea id="latex-output" placeholder="Mã LaTeX đề bài gốc sẽ xuất hiện tại đây..." class="w-full p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none min-h-[180px]"></textarea>
                     
                     <!-- Quick Helper Label inside Editor -->
                     <div class="absolute bottom-2 left-2 bg-slate-800 text-slate-400 text-[11px] px-2 py-0.5 rounded border border-slate-700/60 pointer-events-none">
                         Trực quan & Chỉnh sửa trực tiếp được
                     </div>
                 </div>
- 
+
                 <!-- Action Button Controls -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <!-- Copy LaTeX code -->
@@ -232,33 +227,130 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                         </svg>
-                        <span id="copy-btn-text">Sao chép mã LaTeX</span>
+                        <span id="copy-btn-text">Sao chép mã LaTeX đề gốc</span>
                     </button>
- 
+
                     <!-- Download Word Document -->
                     <button id="download-word-btn" disabled class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-xl transition duration-150 flex items-center justify-center space-x-2 shadow-sm shadow-emerald-500/10">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Tải file Word cho MathType (.docx)</span>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span>Tải file Word đề gốc (.docx)</span>
                     </button>
                 </div>
- 
-                <div class="p-3 bg-amber-50 rounded-lg border border-amber-200/60 text-xs text-amber-800 space-y-1">
-                    <p class="font-semibold flex items-center gap-1.5 text-amber-900">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </div>
+
+            <!-- Generated Quiz Box (Sinh Đề) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col space-y-4">
+                
+                <!-- Title and Action Bar -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h2 class="font-semibold text-slate-900 text-base">Đề sinh tương tự (Đề mới)</h2>
+                            <p class="text-xs text-slate-400">Sinh đề thi mới có cấu trúc tương ứng từ đề gốc</p>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons for generated quiz -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Gen Similar Button -->
+                        <button id="gen-similar-btn" disabled class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-indigo-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17m0 0H9.5" />
+                            </svg>
+                            <span>Sinh đề tương tự</span>
+                        </button>
+
+                        <!-- Gen Creative Button -->
+                        <button id="gen-creative-btn" disabled class="px-3 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-pink-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span>Sinh đề sáng tạo</span>
+                        </button>
+
+                        <!-- Solve Gen Button -->
+                        <button id="solve-gen-btn" disabled class="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-purple-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span>Giải đề sinh chi tiết</span>
+                        </button>
+
+                        <!-- Quick Solve Gen Button -->
+                        <button id="quick-solve-gen-btn" disabled class="px-3 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-[11px] rounded-lg transition duration-200 flex items-center justify-center space-x-1 shadow-sm shadow-amber-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span>Giải nhanh đề sinh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Teacher Custom Directions -->
+                <div class="space-y-1.5">
+                    <label for="teacher-directions" class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Hướng dẫn kích hoạt MathType trong Microsoft Word sau khi tải xuống:
-                    </p>
-                    <ol class="list-decimal pl-4 space-y-0.5 text-slate-700 font-normal">
-                        <li>Mở tệp Word đã tải bằng phần mềm MS Word.</li>
-                        <li>Chọn toàn bộ văn bản bằng tổ hợp phím <kbd class="bg-amber-100 px-1 py-0.5 rounded border border-amber-200">Ctrl + A</kbd>.</li>
-                        <li>Vào tab <strong class="text-amber-900">MathType</strong> trên thanh công cụ và nhấp vào nút <strong class="text-amber-900">"Toggle TeX"</strong> (hoặc nhấn <kbd class="bg-amber-100 px-1 py-0.5 rounded border border-amber-200">Alt + \</kbd>) để toàn bộ công thức LaTeX (bao gồm cả đề bài và lời giải chi tiết) tự động chuyển đổi sang ký hiệu MathType trực quan.</li>
-                    </ol>
+                        Định hướng sư phạm / Yêu cầu ra đề của Giáo viên (Tùy chọn):
+                    </label>
+                    <textarea id="teacher-directions" placeholder="Ví dụ: Thay đổi số liệu và tăng nhẹ độ khó, tập trung vào phương pháp tích phân từng phần, đổi đề bài trắc nghiệm sang câu hỏi tự luận ngắn..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 resize-none h-16 transition duration-150"></textarea>
+                </div>
+
+                <!-- Progress status for generated quiz -->
+                <div id="status-area-gen" class="hidden">
+                    <div class="p-4 bg-purple-50/70 border border-purple-100 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs font-semibold text-purple-700">
+                            <span id="status-label-gen" class="flex items-center gap-2">
+                                <svg class="animate-spin h-3.5 w-3.5 text-purple-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Đang sinh đề tương tự...
+                            </span>
+                            <span id="status-percent-gen">0%</span>
+                        </div>
+                        <div class="w-full bg-purple-200/50 rounded-full h-1.5 overflow-hidden">
+                            <div id="status-bar-gen" class="bg-purple-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generated Output Textarea -->
+                <div class="flex-grow flex flex-col relative">
+                    <textarea id="gen-latex-output" placeholder="Mã LaTeX của đề bài mới sinh sẽ xuất hiện tại đây..." class="w-full p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-sm border border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none min-h-[180px]"></textarea>
+                    
+                    <div class="absolute bottom-2 left-2 bg-slate-800 text-slate-400 text-[11px] px-2 py-0.5 rounded border border-slate-700/60 pointer-events-none">
+                        Đề sinh / Chỉnh sửa tự do
+                    </div>
+                </div>
+
+                <!-- Action Button Controls for Gen Quiz -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <!-- Copy Gen LaTeX -->
+                    <button id="copy-gen-btn" disabled class="px-4 py-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 font-medium text-sm rounded-xl transition duration-150 flex items-center justify-center space-x-2 border border-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span>Sao chép đề sinh</span>
+                    </button>
+
+                    <!-- Download Word Document -->
+                    <button id="download-word-gen-btn" disabled class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-xl transition duration-150 flex items-center justify-center space-x-2 shadow-sm shadow-emerald-500/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Tải file Word đề sinh (.docx)</span>
+                    </button>
                 </div>
             </div>
- 
+
         </section>
     </main>
  
@@ -302,10 +394,10 @@
         // Retrieve and load the user's Gemini API Key on startup
         let apiKey = localStorage.getItem("gemini_api_key") || "";
  
-        // Track selected file/state
+        // Track selected file/state (Single-document processing of Version 2.4)
         let currentFiles = []; 
  
-        // UI Element References
+        // UI Element References - Original Box
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const previewContainer = document.getElementById('preview-container');
@@ -321,6 +413,20 @@
         const statusLabel = document.getElementById('status-label');
         const statusPercent = document.getElementById('status-percent');
         const statusText = document.getElementById('status-text');
+
+        // UI Element References - Gen Quiz Box (New Features)
+        const genSimilarBtn = document.getElementById('gen-similar-btn');
+        const genCreativeBtn = document.getElementById('gen-creative-btn');
+        const solveGenBtn = document.getElementById('solve-gen-btn');
+        const quickSolveGenBtn = document.getElementById('quick-solve-gen-btn');
+        const genLatexOutput = document.getElementById('gen-latex-output');
+        const copyGenBtn = document.getElementById('copy-gen-btn');
+        const downloadWordGenBtn = document.getElementById('download-word-gen-btn');
+        const statusAreaGen = document.getElementById('status-area-gen');
+        const statusBarGen = document.getElementById('status-bar-gen');
+        const statusLabelGen = document.getElementById('status-label-gen');
+        const statusPercentGen = document.getElementById('status-percent-gen');
+        const teacherDirectionsInput = document.getElementById('teacher-directions');
  
         // API UI Fields
         const apiKeyInput = document.getElementById('api-key-input');
@@ -387,15 +493,28 @@
             }
         });
  
-        // Track when text is manually pasted/typed into the editor
-        latexOutput.addEventListener('input', () => {
+        // Synchronize and validate inputs
+        latexOutput.addEventListener('input', checkOriginalOutputState);
+        genLatexOutput.addEventListener('input', checkGenOutputState);
+ 
+        function checkOriginalOutputState() {
             const hasText = latexOutput.value.trim() !== "";
             solveBtn.disabled = !hasText;
             quickSolveBtn.disabled = !hasText;
             copyBtn.disabled = !hasText;
             downloadWordBtn.disabled = !hasText;
-        });
- 
+            genSimilarBtn.disabled = !hasText; 
+            genCreativeBtn.disabled = !hasText;
+        }
+
+        function checkGenOutputState() {
+            const hasText = genLatexOutput.value.trim() !== "";
+            solveGenBtn.disabled = !hasText;
+            quickSolveGenBtn.disabled = !hasText;
+            copyGenBtn.disabled = !hasText;
+            downloadWordGenBtn.disabled = !hasText;
+        }
+
         // Helper to escape HTML characters safely
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
@@ -553,7 +672,12 @@
                     } else {
                         // For 400 client-side errors, throw immediately to prevent unnecessary retries
                         const errBody = await response.text();
-                        throw new Error(`API Error [${response.status}]: ${errBody}`);
+                        let parsedErr;
+                        try {
+                            parsedErr = JSON.parse(errBody);
+                        } catch(e){}
+                        const errMsg = (parsedErr && parsedErr.error && parsedErr.error.message) ? parsedErr.error.message : errBody;
+                        throw new Error(`API Error [${response.status}]: ${errMsg}`);
                     }
                 } catch (err) {
                     if (i === maxRetries - 1) throw err;
@@ -563,21 +687,52 @@
                 delay *= 2; // exponential backing-off: 1s, 2s, 4s, 8s, 16s
             }
         }
- 
-        // 1) Primary Trigger: LaTeX OCR Conversion (Recognize math via Gemini API)
-        convertBtn.addEventListener('click', async () => {
-            if (currentFiles.length === 0) return;
- 
-            // Guard clause for API Key validity before dispatching calls
-            if (!apiKey) {
+
+        // Dynamic API Request Wrapper with Auto Model Fallback (gemini-2.5-flash -> gemini-1.5-flash -> gemini-2.5-flash-preview-09-2025)
+        async function getGeminiResponse(payload) {
+            const savedKey = localStorage.getItem("gemini_api_key") || apiKey;
+            if (!savedKey) {
                 showModal(
                     "Cần nhập API Key",
                     "Vui lòng điền mã Gemini API Key của bạn vào thanh cấu hình ở phía trên đầu trang và bấm 'Lưu Key' để sử dụng chức năng này.",
                     "error"
                 );
-                return;
+                throw new Error("API Key chưa được cấu hình.");
             }
 
+            const models = [
+                "gemini-2.5-flash",
+                "gemini-1.5-flash",
+                "gemini-2.5-flash-preview-09-2025"
+            ];
+
+            let lastError = null;
+            for (const model of models) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${savedKey}`;
+                try {
+                    const responseData = await fetchWithExponentialBackoff(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    return responseData;
+                } catch (err) {
+                    // Try the next model if we hit a 404 model not found error
+                    if (err.message && (err.message.includes("404") || err.message.includes("not found") || err.message.includes("NOT_FOUND") || err.message.includes("not_found"))) {
+                        console.warn(`Mô hình ${model} không khả dụng hoặc chưa hỗ trợ trong tài khoản của bạn (404). Đang thử mô hình dự phòng...`);
+                        lastError = err;
+                        continue;
+                    }
+                    throw err; // Propagate key validation errors (403), limits (429), or bad prompts immediately
+                }
+            }
+            throw lastError || new Error("Tất cả các phiên bản mô hình Gemini đều trả về lỗi không khả dụng.");
+        }
+ 
+        // 1) Primary Trigger: LaTeX OCR Conversion (Recognize math via Gemini API)
+        convertBtn.addEventListener('click', async () => {
+            if (currentFiles.length === 0) return;
+ 
             statusArea.classList.remove('hidden');
             convertBtn.disabled = true;
             solveBtn.disabled = true;
@@ -611,13 +766,7 @@
                         }]
                     };
  
-                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                    const responseData = await fetchWithExponentialBackoff(endpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
- 
+                    const responseData = await getGeminiResponse(payload);
                     const textResult = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (textResult) {
                         fullResult += textResult + "\n\n";
@@ -630,18 +779,14 @@
                 latexOutput.value = fullResult.trim();
                 
                 // Enable secondary tools
-                solveBtn.disabled = false;
-                quickSolveBtn.disabled = false;
-                copyBtn.disabled = false;
-                downloadWordBtn.disabled = false;
-                
+                checkOriginalOutputState();
                 showToast("Đã chuyển đổi LaTeX hoàn tất!");
             } catch (err) {
                 console.error("OCR API error: ", err);
                 statusArea.classList.add('hidden');
                 showModal(
                     "Lỗi chuyển đổi OCR",
-                    `Không thể thực hiện nhận diện toán học bằng trí tuệ nhân tạo. Lỗi: ${err.message}. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.`,
+                    `Không thể thực hiện nhận diện toán học bằng trí tuệ nhân tạo. Lỗi: ${err.message}. Vui lòng kiểm tra lại kết nối mạng, API Key hoặc thử lại sau.`,
                     "error"
                 );
             } finally {
@@ -654,16 +799,6 @@
             const rawContent = latexOutput.value.trim();
             if (!rawContent) return;
  
-            // Guard clause for API Key validity before dispatching calls
-            if (!apiKey) {
-                showModal(
-                    "Cần nhập API Key",
-                    "Vui lòng điền mã Gemini API Key của bạn vào thanh cấu hình ở phía trên đầu trang và bấm 'Lưu Key' để sử dụng chức năng này.",
-                    "error"
-                );
-                return;
-            }
-
             statusArea.classList.remove('hidden');
             solveBtn.disabled = true;
             quickSolveBtn.disabled = true;
@@ -680,15 +815,8 @@
                     }]
                 };
  
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-                
                 updateProgress(60, "Đang khởi tạo lời giải tối ưu...");
-                
-                const responseData = await fetchWithExponentialBackoff(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const responseData = await getGeminiResponse(payload);
  
                 const outputText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (outputText) {
@@ -710,6 +838,7 @@
                 solveBtn.disabled = false;
                 quickSolveBtn.disabled = false;
                 convertBtn.disabled = false;
+                checkOriginalOutputState();
             }
         }
  
@@ -745,6 +874,202 @@ Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dư�
 - Đối với câu trả lời ngắn: Ghi trực tiếp chốt: 'Kết quả: [giá trị]'`;
             solveMathPrompt(prompt, "Đã hiển thị đáp số nhanh!");
         });
+
+        // 4) Sinh đề tương tự (Gen Similar)
+        async function runGenSimilarProcess() {
+            const originalText = latexOutput.value.trim();
+            if (!originalText) return;
+
+            statusAreaGen.classList.remove('hidden');
+            genSimilarBtn.disabled = true;
+            genCreativeBtn.disabled = true;
+            solveGenBtn.disabled = true;
+            quickSolveGenBtn.disabled = true;
+
+            updateProgressGen(45, "Đang thiết lập đề tương tự...");
+
+            try {
+                const teacherDirections = teacherDirectionsInput.value.trim();
+                let promptText = "Bạn là một giáo viên toán học phổ thông chuyên nghiệp của Việt Nam. Dưới đây là nội dung một đề bài toán bằng LaTeX:\n\n" +
+                    originalText + "\n\n" +
+                    "Nhiệm vụ của bạn là biên soạn một ĐỀ THI MỚI hoàn toàn tương tự về: CHỦ ĐỀ, PHƯƠNG PHÁP GIẢI, ĐỘ KHÓ, SỐ LƯỢNG CÂU HỎI và CẤU TRÚC ĐỊNH DẠNG nhưng hãy THAY ĐỔI TOÀN BỘ SỐ LIỆU, tên biến hoặc cách đặt câu hỏi sao cho học sinh không thể chép kết quả trực tiếp mà phải giải theo cách làm tương ứng.\n";
+
+                if (teacherDirections) {
+                    promptText += `\nĐẶC BIỆT CHÚ Ý YÊU CẦU ĐỊNH HƯỚNG RA ĐỀ SAU CỦA GIÁO VIÊN ĐỂ THỰC HIỆN:\n- "${teacherDirections}"\n\n`;
+                }
+
+                promptText += "Hãy tuân thủ nghiêm ngặt các quy tắc định dạng quan trọng sau để bảo toàn độ tương thích tuyệt đối:\n" +
+                    "1. Giữ nguyên vẹn cấu trúc và định dạng đề bài gốc (ví dụ: nếu có các ý a, b, c, d hay trắc nghiệm 4 đáp án A, B, C, D thì đề mới sinh cũng phải giữ nguyên dạng thức trắc nghiệm đó).\n" +
+                    "2. Giữ nguyên cấu trúc phân chia câu bằng 'Câu 1', 'Câu 2',... Không được sửa thành dạng khác.\n" +
+                    "3. ĐỀ BÀI SINH RA PHẢI SẠCH SẼ: Không ghi lời giải chi tiết hay đáp án kèm theo trong nội dung đề bài mới sinh ban đầu này. Không gạch dưới hay bôi đỏ.\n" +
+                    "4. Công thức toán nội dòng (inline equation) BẮT BUỘC bọc trong cặp dấu $...$ đơn. TUYỆT ĐỐI KHÔNG dùng \\( và \\).\n" +
+                    "5. Công thức toán dạng khối (display math) BẮT BUỘC bọc trong cặp dấu $$...$$ đôi. TUYỆT ĐỐI KHÔNG sử dụng \\[ và \\].\n" +
+                    "6. KHÔNG thêm bất kỳ giải thích ngoài lề nào, lời chào hay định dạng khối markdown như (```latex ... ```) xung quanh kết quả. CHỈ TRẢ VỀ văn bản thô trực tiếp chứa mã LaTeX đề bài mới sinh.";
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: promptText }]
+                    }]
+                };
+
+                const responseData = await getGeminiResponse(payload);
+                const generatedContent = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (generatedContent) {
+                    genLatexOutput.value = cleanOutputMarkup(generatedContent);
+                    updateProgressGen(100, "Đã sinh đề xong!");
+                    showToast("Đã sinh đề tương tự thành công!");
+                } else {
+                    throw new Error("Không nhận được nội dung từ API.");
+                }
+            } catch (err) {
+                console.error("Gen Similar Error: ", err);
+                showModal("Lỗi sinh đề tương tự", err.message, "error");
+            } finally {
+                statusAreaGen.classList.add('hidden');
+                genSimilarBtn.disabled = false;
+                genCreativeBtn.disabled = false;
+                checkGenOutputState();
+            }
+        }
+
+        // 5) Sinh đề sáng tạo (Gen Creative)
+        async function runGenCreativeProcess() {
+            const originalText = latexOutput.value.trim();
+            if (!originalText) return;
+
+            statusAreaGen.classList.remove('hidden');
+            genSimilarBtn.disabled = true;
+            genCreativeBtn.disabled = true;
+            solveGenBtn.disabled = true;
+            quickSolveGenBtn.disabled = true;
+
+            updateProgressGen(45, "Đang sáng tạo đề mới...");
+
+            try {
+                const teacherDirections = teacherDirectionsInput.value.trim();
+                let promptText = "Bạn là một giáo viên toán học phổ thông xuất sắc và sáng tạo của Việt Nam. Dưới đây là nội dung một đề bài toán bằng LaTeX:\n\n" +
+                    originalText + "\n\n" +
+                    "Nhiệm vụ của bạn là hãy biến đổi, nâng cấp và SÁNG TẠO ra một đề thi mới dựa trên cấu trúc, chủ đề hoặc định hướng của đề bài toán gốc ở trên.\n" +
+                    "Yêu cầu sáng tạo: Hãy áp dụng tối đa tính tư duy thực tiễn, thay đổi bối cảnh thực tế của bài toán, lồng ghép hoặc kết hợp nhiều kỹ năng giải toán liên môn hoặc thay đổi cách hỏi sâu sắc hơn để khuyến khích học sinh phát triển năng lực tư duy.\n";
+
+                if (teacherDirections) {
+                    promptText += `\nĐẶC BIỆT CHÚ Ý VÀ THỰC THI CHÍNH XÁC THEO ĐỊNH HƯỚNG SÁNG TẠO CỦA GIÁO VIÊN DƯỚI ĐÂY:\n- "${teacherDirections}"\n\n`;
+                }
+
+                promptText += "Hãy tuân thủ nghiêm ngặt các quy tắc định dạng quan trọng sau để bảo toàn độ tương thích tuyệt đối:\n" +
+                    "1. Giữ nguyên cấu trúc phân chia câu bằng 'Câu 1', 'Câu 2',...\n" +
+                    "2. ĐỀ BÀI SINH RA PHẢI SẠCH SẼ: Không ghi lời giải chi tiết hay đáp án kèm theo trong nội dung đề bài mới sinh ban đầu này. Không gạch dưới hay bôi đỏ.\n" +
+                    "3. Công thức toán nội dòng (inline equation) BẮT BUỘC bọc trong cặp dấu $...$ đơn. TUYỆT ĐỐI KHÔNG dùng \\( và \\).\n" +
+                    "4. Công thức toán dạng khối (display math) BẮT BUỘC bọc trong cặp dấu $$...$$ đôi. TUYỆT ĐỐI KHÔNG sử dụng \\[ và \\].\n" +
+                    "5. KHÔNG thêm bất kỳ giải thích ngoài lề nào, lời chào hay định dạng khối markdown như (```latex ... ```) xung quanh kết quả. CHỈ TRẢ VỀ văn bản thô trực tiếp chứa mã LaTeX đề bài mới sinh sáng tạo.";
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: promptText }]
+                    }]
+                };
+
+                const responseData = await getGeminiResponse(payload);
+                const generatedContent = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (generatedContent) {
+                    genLatexOutput.value = cleanOutputMarkup(generatedContent);
+                    updateProgressGen(100, "Đã sinh đề sáng tạo xong!");
+                    showToast("Đã sinh đề sáng tạo thành công!");
+                } else {
+                    throw new Error("Không nhận được nội dung từ API.");
+                }
+            } catch (err) {
+                console.error("Gen Creative Error: ", err);
+                showModal("Lỗi sinh đề sáng tạo", err.message, "error");
+            } finally {
+                statusAreaGen.classList.add('hidden');
+                genSimilarBtn.disabled = false;
+                genCreativeBtn.disabled = false;
+                checkGenOutputState();
+            }
+        }
+
+        // 6) Solve Gen Quiz (Details)
+        async function runSolveGenProcess() {
+            const text = genLatexOutput.value.trim();
+            if (!text) return;
+
+            statusAreaGen.classList.remove('hidden');
+            genSimilarBtn.disabled = true;
+            genCreativeBtn.disabled = true;
+            solveGenBtn.disabled = true;
+            quickSolveGenBtn.disabled = true;
+
+            updateProgressGen(50, "Đang giải đề chi tiết đề sinh...");
+
+            try {
+                const prompt = `Hãy giải chi tiết toàn bộ các câu hỏi toán học dưới đây bằng Tiếng Việt. Định dạng đầu ra phải là mã LaTeX sạch (không bọc trong khối markdown \`\`\`latex). Quy ước trình bày tương tự như việc giải chi tiết đề gốc.`;
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `${prompt}\n\nĐề bài LaTeX:\n${text}` }]
+                    }]
+                };
+
+                const responseData = await getGeminiResponse(payload);
+                const outputText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (outputText) {
+                    genLatexOutput.value = cleanOutputMarkup(outputText);
+                    updateProgressGen(100, "Đã hoàn thành!");
+                    showToast("Giải đề sinh thành công!");
+                } else {
+                    throw new Error("Không nhận được phản hồi từ AI.");
+                }
+            } catch (err) {
+                console.error("Solve Gen Error: ", err);
+                showModal("Lỗi giải đề sinh", err.message, "error");
+            } finally {
+                statusAreaGen.classList.add('hidden');
+                genSimilarBtn.disabled = false;
+                genCreativeBtn.disabled = false;
+                checkGenOutputState();
+            }
+        }
+
+        // 7) Solve Gen Quiz (Quick)
+        async function runQuickSolveGenProcess() {
+            const text = genLatexOutput.value.trim();
+            if (!text) return;
+
+            statusAreaGen.classList.remove('hidden');
+            genSimilarBtn.disabled = true;
+            genCreativeBtn.disabled = true;
+            solveGenBtn.disabled = true;
+            quickSolveGenBtn.disabled = true;
+
+            updateProgressGen(50, "Đang giải nhanh đề sinh...");
+
+            try {
+                const prompt = `Hãy cung cấp danh sách đáp án ngắn gọn của các câu hỏi dưới đây bằng Tiếng Việt. Định dạng đầu ra là mã LaTeX sạch. Quy ước chốt phương án hoặc kết quả tương tự như đề gốc.`;
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `${prompt}\n\nĐề bài LaTeX:\n${text}` }]
+                    }]
+                };
+
+                const responseData = await getGeminiResponse(payload);
+                const outputText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (outputText) {
+                    genLatexOutput.value = cleanOutputMarkup(outputText);
+                    updateProgressGen(100, "Đã hoàn thành!");
+                    showToast("Giải nhanh đề sinh thành công!");
+                } else {
+                    throw new Error("Không nhận được phản hồi từ AI.");
+                }
+            } catch (err) {
+                console.error("Quick Solve Gen Error: ", err);
+                showModal("Lỗi giải nhanh đề sinh", err.message, "error");
+            } finally {
+                statusAreaGen.classList.add('hidden');
+                genSimilarBtn.disabled = false;
+                genCreativeBtn.disabled = false;
+                checkGenOutputState();
+            }
+        }
  
         // Copy to clipboard helper
         copyBtn.addEventListener('click', () => {
@@ -767,12 +1092,29 @@ Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dư�
                 showToast("Đã sao chép mã LaTeX vào Clipboard!");
                 
                 setTimeout(() => {
-                    copyBtnText.innerText = "Sao chép mã LaTeX";
+                    copyBtnText.innerText = "Sao chép mã LaTeX đề gốc";
                     copyBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
                     copyBtn.classList.add('bg-slate-100', 'text-slate-700');
                 }, 2000);
             } catch (err) {
                 showToast("Không thể tự động sao chép. Hãy chọn tất cả và nhấn Ctrl+C.");
+            }
+        });
+
+        // Copy Gen LaTeX helper
+        copyGenBtn.addEventListener('click', () => {
+            const textToCopy = genLatexOutput.value;
+            if (!textToCopy) return;
+            try {
+                const tempTextArea = document.createElement("textarea");
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempTextArea);
+                showToast("Đã sao chép mã đề sinh!");
+            } catch (err) {
+                showToast("Không thể tự động sao chép.");
             }
         });
  
@@ -1019,7 +1361,19 @@ Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dư�
  
             downloadWordBtn.disabled = true;
             showToast("Đang kết xuất tệp Word .docx chuẩn...");
- 
+            downloadWordFileFromText(finalContent, `MathType_Ready_${Date.now()}.docx`);
+            downloadWordBtn.disabled = false;
+        });
+
+        // Download Word Document for generated quiz
+        downloadWordGenBtn.addEventListener('click', () => {
+            const finalContent = genLatexOutput.value.trim();
+            if (!finalContent) return;
+            showToast("Đang kết xuất đề sinh thành tệp Word...");
+            downloadWordFileFromText(finalContent, `MathType_Ready_DeSinh_${Date.now()}.docx`);
+        });
+
+        function downloadWordFileFromText(rawContent, filename) {
             try {
                 const zip = new JSZip();
                 
@@ -1038,7 +1392,7 @@ Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dư�
                     </Relationships>`);
                 
                 // 3. word/document.xml (Inject processed paragraphs with style markers)
-                const bodyContent = parseAndApplyStylesToDocx(finalContent);
+                const bodyContent = parseAndApplyStylesToDocx(rawContent);
                 
                 zip.file("word/document.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                     <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -1052,28 +1406,49 @@ Với mỗi câu hỏi, hãy trình bày đề bài sạch gốc, ngay bên dư�
                     </w:document>`);
                 
                 // Generate download link securely
-                const content = await zip.generateAsync({ type: "blob" });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(content);
-                link.download = `MathOCR_Report_${Date.now()}.docx`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
- 
-                showToast("Tải tệp Word thành công!");
+                zip.generateAsync({ type: "blob" }).then(function (content) {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(content);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showToast("Tải tệp Word thành công!");
+                });
             } catch (err) {
                 console.error("DOCX generation error: ", err);
                 showModal("Lỗi tạo tệp", "Không thể tự động xuất dữ liệu sang định dạng Word .docx.", "error");
-            } finally {
-                downloadWordBtn.disabled = false;
             }
-        });
+        }
  
         // Helper to update linear progress UI
         function updateProgress(percent, text) {
             statusBar.style.width = percent + "%";
             statusPercent.innerText = percent + "%";
             statusText.innerText = text;
+        }
+
+        // Helper to update progress for generated quiz
+        function updateProgressGen(percent, text) {
+            statusBarGen.style.width = percent + "%";
+            statusPercentGen.innerText = percent + "%";
+            statusLabelGen.innerText = text;
+        }
+
+        // Clean markup wrapper
+        function cleanOutputMarkup(text) {
+            let cleaned = text.trim();
+            if (cleaned.startsWith("```latex")) {
+                cleaned = cleaned.replace(/^```latex\n?/, "");
+                cleaned = cleaned.replace(/\n?```$/, "");
+            } else if (cleaned.startsWith("```")) {
+                cleaned = cleaned.replace(/^```\n?/, "");
+                cleaned = cleaned.replace(/\n?```$/, "");
+            }
+            cleaned = cleaned.replace(/\\\[/g, "$$");
+            cleaned = cleaned.replace(/\\\]/g, "$$");
+            cleaned = cleaned.replace(/\\\(|\\\)/g, "$");
+            return cleaned.trim();
         }
  
         // Toast Feedback Notification
